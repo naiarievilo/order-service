@@ -1,0 +1,9 @@
+{
+  "properties": [
+    {
+      "name": "polar.catalog-service-uri",
+      "type": "java.lang.String",
+      "description": "Base URL of the Polar's catalog service"
+    }
+  ]
+}

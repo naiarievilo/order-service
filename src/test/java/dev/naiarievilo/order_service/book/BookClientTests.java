@@ -1,0 +1,68 @@
+package dev.naiarievilo.order_service.book;
+
+import java.io.IOException;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.web.reactive.function.client.WebClient;
+
+import dev.naiarievilo.order_service.book.Book;
+import dev.naiarievilo.order_service.book.BookClient;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
+
+
+public class BookClientTests {
+
+    private MockWebServer mockWebServer;
+    private BookClient bookClient;
+
+    @BeforeEach
+    public void setUp() throws IOException {
+        this.mockWebServer = new MockWebServer();
+        this.mockWebServer.start();
+
+        var webClient = WebClient.builder()
+            .baseUrl(mockWebServer.url("/").uri().toString())
+            .build();
+        this.bookClient = new BookClient(webClient);
+    }
+
+    @AfterEach
+    public void tearDown() throws IOException {
+        this.mockWebServer.shutdown();
+    }
+
+    @Test
+    public void whenBookExist_ThenReturnBook() {
+        String bookIsbn = "1234567890";
+
+        var mockResponse = new MockResponse()
+            .addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+            .setBody("""
+                {
+                    "isbn": %s,
+                    "title": "Title",
+                    "author": "Author",
+                    "price": 9.90,
+                    "publisher": "Polarsophia"
+                }
+                """.formatted(bookIsbn)
+            );
+        
+        mockWebServer.enqueue(mockResponse);
+
+        Mono<Book> book = bookClient.getBookByIsbn(bookIsbn);
+
+        StepVerifier.create(book)
+            .expectNextMatches(
+                b -> b.isbn().equals(bookIsbn)
+            )
+            .verifyComplete();
+    }
+}

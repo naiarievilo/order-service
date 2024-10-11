@@ -9,8 +9,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import dev.naiarievilo.order_service.book.Book;
-import dev.naiarievilo.order_service.book.BookClient;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import reactor.core.publisher.Mono;
@@ -39,7 +37,7 @@ public class BookClientTests {
     }
 
     @Test
-    public void whenBookExist_ThenReturnBook() {
+    public void whenBookExists_ThenReturnBook() {
         String bookIsbn = "1234567890";
 
         var mockResponse = new MockResponse()
